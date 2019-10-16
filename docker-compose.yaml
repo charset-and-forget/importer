@@ -5,7 +5,7 @@ services:
     build:
       context: .
     volumes:
-      - './data/source/:/data'
+      - './data/:/data'
     environment:
       - MONGODB=mongodb://mongodb:27017/
       - BASEPATH_DATA=/data
@@ -18,4 +18,8 @@ services:
       MONGODB_DATA_DIR: /data/db
       MONDODB_LOG_DIR: /dev/null
     volumes:
-      - ./data/mongodb/:/data/db
+      - mongodbdata/:/data/db
+
+volumes:
+  mongodbdata:
+    driver: local
