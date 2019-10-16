@@ -6,9 +6,8 @@ services:
       context: .
     volumes:
       - './data/:/data'
-    environment:
-      - MONGODB=mongodb://mongodb:27017/
-      - BASEPATH_DATA=/data
+    env_file:
+      - ./docker.env
     depends_on:
       - mongodb
   mongodb:
