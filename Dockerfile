@@ -4,6 +4,6 @@ WORKDIR /usr/src/app
 
 COPY src/* ./
 RUN pip install --no-cache-dir -r requirements.txt
-RUN pycodestyle --statistics -qq ./
+RUN pycodestyle ./
 
 ENTRYPOINT python script.py
