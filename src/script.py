@@ -7,7 +7,7 @@ MONGODB = pymongo.MongoClient(os.getenv('MONGODB'))
 
 
 def main():
-    MONGODB['importer'].command('ping')
+    MONGODB[os.getenv('MONGODB_DATABASE')].command('ping')
     os.listdir(os.getenv('BASEPATH_DATA'))
 
 
