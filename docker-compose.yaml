@@ -5,9 +5,10 @@ services:
     build:
       context: .
     volumes:
-      - './data/source/.:/data'
+      - './data/source/:/data'
     environment:
       - MONGODB=mongodb://mongodb:27017/
+      - BASEPATH_DATA=/data
     depends_on:
       - mongodb
   mongodb:
