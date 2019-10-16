@@ -1,10 +1,11 @@
 IMAGE := importer
 
-.PHONY: start
-start: build
-	docker-compose up
+.PHONY: up
+up:
+	docker-compose up --build
 
 
 .PHONY: build
 build:
-	docker-compose build
+	docker build -t $(value IMAGE):latest .
+

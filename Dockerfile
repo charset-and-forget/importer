@@ -2,8 +2,8 @@ FROM python:3.7
 
 WORKDIR /usr/src/app
 
-COPY src/* ./
+COPY src/ ./
 RUN pip install --no-cache-dir -r requirements.txt
 RUN pycodestyle ./
 
-ENTRYPOINT python script.py
+CMD python script.py
