@@ -1,0 +1,22 @@
+version: '3.5'
+
+services:
+  importer:
+    build:
+      context: .
+    volumes:
+      - './data/source/.:/data'
+    environment:
+      - MONGODB=mongodb://root:pass@mongodb:27017/importer
+    depends_on:
+      - mongodb
+  mongodb:
+    image: mongo:4.2.0
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: pass
+      MONGO_INITDB_DATABASE: importer
+      MONGODB_DATA_DIR: /data/db
+      MONDODB_LOG_DIR: /dev/null
+    volumes:
+      - ./data/mongodb/:/data/db
