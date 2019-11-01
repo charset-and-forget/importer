@@ -3,33 +3,35 @@ import glob
 
 import lxml.etree
 
-import app.preparation.flows
-import app.preparation.wp.parsers as wp_parsers
-import app.preparation.wp.extractors as wp_extractors
+import preparation.flows
+import preparation.wp.parsers as wp_parsers
+import preparation.wp.extractors as wp_extractors
+import preparation.flows.source
+import preparation.flows.destination
 
 
-class PreparatorBase:
-    extractors = None
-    flow_cls = app.preparation.flows.DumbFlow
+class Preparator:
+    extractors = []
     parser_cls = None
+    source_flow_cls = None
+    destination_flow_cls = None
     # supported_groups = ['posts', 'authors', 'sections', 'media', 'guest_authors']
 
-    @classmethod
-    def process(cls, source, destination=None):
+    def process(self, source, destination):
         response = collections.defaultdict(dict)
 
-        for content in cls.flow_cls.iterate_from_source(source):
+        for content in self.source_flow_cls.iterate_from_source(source):
             try:
-                parsed_content = cls.parser_cls.parse(content)
+                parsed_content = self.parser_cls.parse(content)
             except lxml.etree.XMLSyntaxError:
-                prepared_content = cls._prepare_content(content)
+                prepared_content = self._prepare_content(content)
                 try:
-                    parsed_content = cls.parser_cls.parse(prepared_content)
+                    parsed_content = self.parser_cls.parse(prepared_content)
                 except:
                     with open('error.xml', 'wb') as f:
                         f.write(prepared_content)
                     raise
-            for extractor in cls.extractors:
+            for extractor in self.extractors:
                 for group, key, item in extractor.iterate(parsed_content):
                     response[group][key] = item
 
@@ -38,7 +40,7 @@ class PreparatorBase:
             k: v.values()
             for k, v in response.items()
         }
-        return cls.flow_cls.move_to_destination(response, destination)
+        return self.destination_flow_cls.move_to_destination(response, destination)
 
     @classmethod
     def _prepare_content(cls, content):
@@ -52,7 +54,8 @@ class PreparatorBase:
         return content
 
 
-class WpPreparator(PreparatorBase):
+class WpPreparator(Preparator):
     extractors = [wp_extractors.SectionExtractor, wp_extractors.ItemExtractor, wp_extractors.AuthorExtractor]
-    flow_cls = app.preparation.flows.FileFlow
     parser_cls = wp_parsers.DefaultXmlParser
+    source_flow_cls = preparation.flows.source.FileSourceFlow
+    destination_flow_cls = preparation.flows.destination.FileDestinationFlow
