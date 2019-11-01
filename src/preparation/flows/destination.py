@@ -1,6 +1,8 @@
 import json
 import os
 
+import utils
+
 
 class DestinationFlowBase:
     @classmethod
@@ -20,4 +22,9 @@ class FileDestinationFlow(DestinationFlowBase):
 
 
 class MongoDestinationFlow(DestinationFlowBase):
-    pass
+    @classmethod
+    def move_to_destination(cls, response, destination):
+        # destination is a pymongo MongoDB object
+        for collection, items in response.items():
+            for chunk in utils.chunk(100, items):
+                destination[collection].insert_many(chunk)
