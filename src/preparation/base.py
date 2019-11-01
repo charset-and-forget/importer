@@ -17,21 +17,22 @@ class Preparator:
     destination_flow_cls = None
     # supported_groups = ['posts', 'authors', 'sections', 'media', 'guest_authors']
 
-    def process(self, source, destination):
+    @classmethod
+    def process(cls, source, destination):
         response = collections.defaultdict(dict)
 
-        for content in self.source_flow_cls.iterate_from_source(source):
+        for content in cls.source_flow_cls.iterate_from_source(source):
             try:
-                parsed_content = self.parser_cls.parse(content)
+                parsed_content = cls.parser_cls.parse(content)
             except lxml.etree.XMLSyntaxError:
-                prepared_content = self._prepare_content(content)
+                prepared_content = cls._prepare_content(content)
                 try:
-                    parsed_content = self.parser_cls.parse(prepared_content)
+                    parsed_content = cls.parser_cls.parse(prepared_content)
                 except:
                     with open('error.xml', 'wb') as f:
                         f.write(prepared_content)
                     raise
-            for extractor in self.extractors:
+            for extractor in cls.extractors:
                 for group, key, item in extractor.iterate(parsed_content):
                     response[group][key] = item
 
@@ -40,7 +41,7 @@ class Preparator:
             k: v.values()
             for k, v in response.items()
         }
-        return self.destination_flow_cls.move_to_destination(response, destination)
+        return cls.destination_flow_cls.move_to_destination(response, destination)
 
     @classmethod
     def _prepare_content(cls, content):
