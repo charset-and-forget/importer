@@ -16,7 +16,7 @@ class API:
         self.api_key = api_key
         self.auth = (http_auth_user, http_auth_pwd) if http_auth_user else None
 
-    def upload_image(self, image_url, caption, credit, alt):
+    def upload_image(self, image_url, caption='', credit='', alt=''):
         url = 'https://{}/api/{}/images'.format(self.domain, self.API_VERSION)
         params = {
             'image_url': image_url,
