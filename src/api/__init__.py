@@ -8,8 +8,14 @@ class ApiError(Exception):
     pass
 
 
+class SectionStatus:
+    PRIVATE = 1
+    PUBLIC = 2
+    UNLISTED = 3
+
+
 class API:
-    API_VERSION = 'v1.3'
+    API_VERSION = '1.3'
 
     def __init__(self, domain, api_key, http_auth_user=None, http_auth_pwd=None):
         self.domain = domain
@@ -30,6 +36,24 @@ class API:
             'shortcode_id': response['shortcode_id'],
             'image_id': response['id'],
             'shortcode': response['shortcode'],
+        }
+        return result
+
+    def create_section(self, title, url, status=SectionStatus.PRIVATE, about_html=''):
+        api_url = 'https://{}/api/{}/sections'.format(self.domain, self.API_VERSION)
+        params = {
+            'title': title,
+            'url': url,
+            'status': status,
+            'about_html': about_html,
+        }
+        response = self._post_request(api_url, data=params)
+        result = {
+            'id': response['id'],
+            'title': response['title'],
+            'url': response['url'],
+            'status': response['status'],
+            'parent_id': response['parent_id'],
         }
         return result
 
