@@ -1,5 +1,5 @@
 import copy
-import json
+# import json
 
 import requests
 
@@ -10,14 +10,14 @@ class ApiError(Exception):
 
 class API:
     API_VERSION = 'v1.3'
-    API_URL = 'https://www.rebelmouse.com/api'
 
-    def __init__(self, api_key, http_auth_user=None, http_auth_pwd=None):
+    def __init__(self, domain, api_key, http_auth_user=None, http_auth_pwd=None):
+        self.domain = domain
         self.api_key = api_key
         self.auth = (http_auth_user, http_auth_pwd) if http_auth_user else None
 
     def upload_image(self, image_url, caption, credit, alt):
-        url = '{}/{}/images'.format(self.API_URL, self.API_VERSION)
+        url = 'https://{}/api/{}/images'.format(self.domain, self.API_VERSION)
         params = {
             'image_url': image_url,
             'caption': caption,
@@ -40,6 +40,8 @@ class API:
         response = session.send(prepped)
         if response.status_code == requests.codes.ok:
             return response.json()
+        print(response.url)
+        print(response.history)
         raise ApiError(response.json())
 
     def _post_request(self, url, params=None, data=None):
@@ -47,7 +49,7 @@ class API:
         request = requests.Request(
             'POST',
             url=url,
-            data=json.dumps(data),
+            json=data,
             params=params,
             auth=self.auth,
         )
