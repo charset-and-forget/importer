@@ -12,8 +12,9 @@ class API:
     API_VERSION = 'v1.3'
     API_URL = 'https://www.rebelmouse.com/api'
 
-    def __init__(self, api_key):
+    def __init__(self, api_key, http_auth_user=None, http_auth_pwd=None):
         self.api_key = api_key
+        self.auth = (http_auth_user, http_auth_pwd) if http_auth_user else None
 
     def upload_image(self, image_url, caption, credit, alt):
         url = '{}/{}/images'.format(self.API_URL, self.API_VERSION)
@@ -48,6 +49,7 @@ class API:
             url=url,
             data=json.dumps(data),
             params=params,
+            auth=self.auth,
         )
         return self._request(request)
 
