@@ -1,4 +1,5 @@
 import copy
+import json
 
 import requests
 
@@ -22,7 +23,14 @@ class API:
             'photo_credit': credit,
             'alt': alt,
         }
-        return self._post_request(url, data=params)
+        response = self._post_request(url, data=params)
+        result = {
+            'is_animated_gif': response['is_animated_gif'],
+            'shortcode_id': response['shortcode_id'],
+            'image_id': response['id'],
+            'shortcode': response['shortcode'],
+        }
+        return result
 
     def _request(self, request):
         # requests.Request(method, url, headers, files, data, params, auth, cookies, hooks, json)
@@ -38,7 +46,7 @@ class API:
         request = requests.Request(
             'POST',
             url=url,
-            data=data,
+            data=json.dumps(data),
             params=params,
         )
         return self._request(request)
