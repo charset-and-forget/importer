@@ -59,4 +59,4 @@ class WpPreparator(Preparator):
     extractors = [wp_extractors.SectionExtractor, wp_extractors.ItemExtractor, wp_extractors.AuthorExtractor]
     parser_cls = wp_parsers.DefaultXmlParser
     source_flow_cls = preparation.flows.source.FileSourceFlow
-    destination_flow_cls = preparation.flows.destination.FileDestinationFlow
+    destination_flow_cls = preparation.flows.destination.MongoDestinationFlow
