@@ -10,6 +10,8 @@ class ItemUploader:
     def upload_all(self):
         failed = []
         for original_item in self._iter_source_items():
+            if self._is_processed(original_item):
+                continue
             try:
                 self.upload(original_item)
             except Exception as e:
