@@ -1,4 +1,4 @@
-class ItemUploader:
+class ItemImporter:
     source_collection = None
     destination_collection = None
     original_key_fields = []
@@ -39,9 +39,9 @@ class ItemUploader:
         return collection.insert_one(item)
 
 
-class ImageUploader(ItemUploader):
+class ImageImporter(ItemImporter):
     source_collection = 'attachments'
-    destination_collection = 'uploaded_images'
+    destination_collection = 'imported_images'
     original_key_fields = ['id', 'url']
 
     def upload(self, original_item):
@@ -50,5 +50,18 @@ class ImageUploader(ItemUploader):
             caption=original_item['content'],
             credit=original_item['excerpt'],
             # alt='',
+        )
+        self._store_response(original_item, response)
+
+
+class SectionsImporter(ItemImporter):
+    source_collection = 'sections'
+    destination_collection = 'imported_sections'
+    original_key_fields = ['title', 'url']
+
+    def upload(self, original_item):
+        response = self.api.create_section(
+            title=original_item['title'],
+            url=original_item['url'],
         )
         self._store_response(original_item, response)
