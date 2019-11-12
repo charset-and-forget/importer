@@ -57,6 +57,22 @@ class API:
         }
         return result
 
+    def create_author(self, first_name, last_name, email, password, about_html='', image_id=None, specific_data=None):
+        api_url = 'https://{}/api/{}/authors'.format(self.domain, self.API_VERSION)
+        params = {
+            'first_name': first_name,
+            'last_name': last_name,
+            'email': email,
+            'password': password,
+            'about_html': about_html,
+        }
+        if image_id:
+            params['image_id'] = image_id
+        if specific_data:
+            params['specific_data'] = specific_data
+        response = self._post_request(api_url, data=params)
+        return response
+
     def _request(self, request):
         # requests.Request(method, url, headers, files, data, params, auth, cookies, hooks, json)
         session = requests.Session()
