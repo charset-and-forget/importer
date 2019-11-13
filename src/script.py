@@ -25,10 +25,12 @@ def main():
 
     # import
     images = importer.ImageImporter(db, api)
-    images.upload_all()
+    failed_images = images.upload_all()
+    print(len(failed_images))
 
     sections = importer.SectionsImporter(db, api)
-    sections.upload_all()
+    failed_sections = sections.upload_all()
+    print(len(failed_sections))
 
 
 if __name__ == '__main__':
