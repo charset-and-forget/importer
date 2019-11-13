@@ -28,7 +28,7 @@ class Preparator:
                 prepared_content = cls._prepare_content(content)
                 try:
                     parsed_content = cls.parser_cls.parse(prepared_content)
-                except:
+                except Exception:
                     with open('error.xml', 'wb') as f:
                         f.write(prepared_content)
                     raise
