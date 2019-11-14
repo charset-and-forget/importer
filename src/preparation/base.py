@@ -35,6 +35,10 @@ class Preparator:
             for extractor in cls.extractors:
                 for group, key, item in extractor.iterate(parsed_content):
                     response[group][key] = item
+                print('Extracting items using', extractor.__name__)
+                for k, v in response.items():
+                    print(k, len(v))
+                print()
 
         # flattening response:
         response = {
