@@ -1,5 +1,6 @@
 src/settings.py
 test.py
+sftp-config.json
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

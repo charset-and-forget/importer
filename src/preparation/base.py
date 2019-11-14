@@ -28,13 +28,17 @@ class Preparator:
                 prepared_content = cls._prepare_content(content)
                 try:
                     parsed_content = cls.parser_cls.parse(prepared_content)
-                except:
+                except Exception:
                     with open('error.xml', 'wb') as f:
                         f.write(prepared_content)
                     raise
             for extractor in cls.extractors:
                 for group, key, item in extractor.iterate(parsed_content):
                     response[group][key] = item
+                print('Extracting items using', extractor.__name__)
+                for k, v in response.items():
+                    print(k, len(v))
+                print()
 
         # flattening response:
         response = {
@@ -59,4 +63,4 @@ class WpPreparator(Preparator):
     extractors = [wp_extractors.SectionExtractor, wp_extractors.ItemExtractor, wp_extractors.AuthorExtractor]
     parser_cls = wp_parsers.DefaultXmlParser
     source_flow_cls = preparation.flows.source.FileSourceFlow
-    destination_flow_cls = preparation.flows.destination.FileDestinationFlow
+    destination_flow_cls = preparation.flows.destination.MongoDestinationFlow
