@@ -11,6 +11,7 @@ class ItemImporter:
         failed = []
         for original_item in self._iter_source_items():
             if self._is_processed(original_item):
+                print('item already processed:', original_item['_id'])
                 continue
             try:
                 self.upload(original_item)
@@ -29,7 +30,7 @@ class ItemImporter:
     def _is_processed(self, original_item):
         collection = self.db[self.destination_collection]
         query = {i: original_item[i] for i in self.original_key_fields}
-        return bool(collection.find(query))
+        return bool(list(collection.find(query)))
 
     def _store_response(self, original_item, response):
         # store response and item's key in destination collection for future
