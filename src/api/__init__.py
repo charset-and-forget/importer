@@ -68,7 +68,8 @@ class API:
         image_id=None,
         specific_data=None,
     ):
-        api_url = 'https://{}/api/{}/authors'.format(self.domain, self.API_VERSION)
+        # api_url = 'https://{}/api/{}/authors'.format(self.domain, self.API_VERSION)
+        api_url = 'https://{}/api/1.1/authors'.format(self.domain)
         params = {
             'email': email,
             'name': name,
