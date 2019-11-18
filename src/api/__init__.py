@@ -14,7 +14,7 @@ class SectionStatus:
     UNLISTED = 3
 
 
-class API:
+class ApiBase:
     API_VERSION = '1.3'
 
     def __init__(self, domain, api_key, http_auth_user=None, http_auth_pwd=None):
@@ -22,6 +22,35 @@ class API:
         self.api_key = api_key
         self.auth = (http_auth_user, http_auth_pwd) if http_auth_user else None
 
+    def _request(self, request):
+        # requests.Request(method, url, headers, files, data, params, auth, cookies, hooks, json)
+        session = requests.Session()
+        prepped = request.prepare()
+        response = session.send(prepped)
+        if response.status_code == requests.codes.ok:
+            return response.json()
+        print(response.url)
+        print(response.history)
+        raise ApiError(response.json())
+
+    def _post_request(self, url, params=None, data=None):
+        params = self._build_params(params)
+        request = requests.Request(
+            'POST',
+            url=url,
+            json=data,
+            params=params,
+            auth=self.auth,
+        )
+        return self._request(request)
+
+    def _build_params(self, params):
+        params = copy.deepcopy(params) if params else {}
+        params['api_key'] = self.api_key
+        return params
+
+
+class API(ApiBase):
     def upload_image(self, image_url, caption='', credit='', alt=''):
         url = 'https://{}/api/{}/images'.format(self.domain, self.API_VERSION)
         params = {
@@ -89,30 +118,3 @@ class API:
             params['specific_data'] = specific_data
         response = self._post_request(api_url, data=params)
         return response
-
-    def _request(self, request):
-        # requests.Request(method, url, headers, files, data, params, auth, cookies, hooks, json)
-        session = requests.Session()
-        prepped = request.prepare()
-        response = session.send(prepped)
-        if response.status_code == requests.codes.ok:
-            return response.json()
-        print(response.url)
-        print(response.history)
-        raise ApiError(response.json())
-
-    def _post_request(self, url, params=None, data=None):
-        params = self._build_params(params)
-        request = requests.Request(
-            'POST',
-            url=url,
-            json=data,
-            params=params,
-            auth=self.auth,
-        )
-        return self._request(request)
-
-    def _build_params(self, params):
-        params = copy.deepcopy(params) if params else {}
-        params['api_key'] = self.api_key
-        return params
