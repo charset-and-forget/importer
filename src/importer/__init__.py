@@ -86,3 +86,17 @@ class AuthorsImporter(ItemImporter):
             },
         )
         self._store_response(original_item, response)
+
+
+class PostsImporter(ItemImporter):
+    source_collection = 'posts'
+    destination_collection = 'imported_posts'
+    original_key_fields = ['id']
+
+    def __init__(self, db, api):
+        self.db = db
+        self.api = api
+
+    def upload(self, original_item):
+        response = self.api.create_post(**original_item)
+        self._store_response(original_item, response)
