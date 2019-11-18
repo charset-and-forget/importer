@@ -28,6 +28,10 @@ def main():
     failed_images = images.upload_all()
     print(len(failed_images))
 
+    authors = importer.AuthorsImporter(db, api)
+    failed_authors = authors.upload_all()
+    print(len(failed_authors))
+
     sections = importer.SectionsImporter(db, api)
     failed_sections = sections.upload_all()
     print(len(failed_sections))

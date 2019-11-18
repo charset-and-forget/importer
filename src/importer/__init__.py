@@ -66,3 +66,23 @@ class SectionsImporter(ItemImporter):
             url=original_item['url'],
         )
         self._store_response(original_item, response)
+
+
+class AuthorsImporter(ItemImporter):
+    source_collection = 'authors'
+    destination_collection = 'imported_authors'
+    original_key_fields = ['id', 'login']
+
+    def upload(self, original_item):
+        specific_data = {i: original_item[i] for i in self.original_key_fields}
+        response = self.api.create_author(
+            email=original_item['email'],
+            name=original_item['login'],
+            first_name=original_item['first_name'],
+            last_name=original_item['last_name'],
+            specific_data={
+                'provider_user_key': original_item['login'],
+                'provider_user_id': original_item['id'],
+            },
+        )
+        self._store_response(original_item, response)

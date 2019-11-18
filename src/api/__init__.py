@@ -57,15 +57,32 @@ class API:
         }
         return result
 
-    def create_author(self, first_name, last_name, email, password, about_html='', image_id=None, specific_data=None):
-        api_url = 'https://{}/api/{}/authors'.format(self.domain, self.API_VERSION)
+    def create_author(
+        self,
+        email,
+        name,
+        first_name=None,
+        last_name=None,
+        password=None,
+        about_html='',
+        image_id=None,
+        specific_data=None,
+    ):
+        # api_url = 'https://{}/api/{}/authors'.format(self.domain, self.API_VERSION)
+        api_url = 'https://{}/api/1.1/authors'.format(self.domain)
         params = {
-            'first_name': first_name,
-            'last_name': last_name,
             'email': email,
-            'password': password,
+            'name': name,
             'about_html': about_html,
         }
+        if first_name:
+            params['first_name'] = first_name
+        if last_name:
+            params['last_name'] = last_name
+        if password:
+            params['password'] = password
+        if image_id:
+            params['image_id'] = image_id
         if image_id:
             params['image_id'] = image_id
         if specific_data:
