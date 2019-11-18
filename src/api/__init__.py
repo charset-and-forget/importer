@@ -8,6 +8,10 @@ class ApiError(Exception):
     pass
 
 
+class ApiValidationError(ApiError):
+    pass
+
+
 class SectionStatus:
     PRIVATE = 1
     PUBLIC = 2
@@ -85,6 +89,12 @@ class API(ApiBase):
             'parent_id': response['parent_id'],
         }
         return result
+
+    def create_post(self, **entry):
+        api_url = 'https://{}/api/{}/posts'.format(self.domain, self.API_VERSION)
+        if not entry.get('headline'):
+            raise ApiValidationError('headline is required')
+        return self._post_request(api_url, data=entry)
 
     def create_author(
         self,
