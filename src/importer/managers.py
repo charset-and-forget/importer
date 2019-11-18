@@ -29,3 +29,19 @@ class StoredAttachmentsManager:
         # return (caption, credit)
         item = self.db[self.items_collection].find_one({'id': attachment_id})
         return (item['content'] or '', item['excerpt'] or '')
+
+
+class WpAuthorsManager:
+    author_key_field = 'login'
+    author_id_field = 'id'
+
+    response_collection = 'imported_authors'
+
+    def __init__(self, db):
+        self.db = db
+
+    def get_by_key(self, author_key):
+        item = self.db[self.response_collection].find_one({'login': author_key})
+        if item:
+            return item['response']
+        raise KeyError()
