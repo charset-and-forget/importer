@@ -45,3 +45,24 @@ class WpAuthorsManager:
         if item:
             return item['response']
         raise KeyError()
+
+
+class WpSectionsManager:
+    URL_FIELD = 'url'
+    TITLE_FIELD = 'title'
+    STATUS_FIELD = 'status'  # optional
+
+    response_collection = 'imported_sections'
+
+    # def __init__(self, roar_id, sections_source):
+    def __init__(self, db):
+        self.db = db
+        self.url_mapping = {}
+        items = self.db[self.response_collection].find({})
+        self.sections_map = {
+            item[self.URL_FIELD]: item['response']['id']
+            for item in items
+        }
+
+    def get_by_slug(self, slug):
+        return self.sections_map[slug]
