@@ -48,6 +48,16 @@ class ApiBase:
         )
         return self._request(request)
 
+    def _put_request(self, url, params=None):
+        params = self._build_params(params)
+        request = requests.Request(
+            'PUT',
+            url=url,
+            params=params,
+            auth=self.auth,
+        )
+        return self._request(request)
+
     def _build_params(self, params):
         params = copy.deepcopy(params) if params else {}
         params['api_key'] = self.api_key
@@ -90,11 +100,15 @@ class API(ApiBase):
         }
         return result
 
-    def create_post(self, **entry):
-        api_url = 'https://{}/api/{}/posts'.format(self.domain, self.API_VERSION)
+    def create_draft(self, **entry):
+        api_url = 'https://{}/api/{}/drafts'.format(self.domain, self.API_VERSION)
         if not entry.get('headline'):
             raise ApiValidationError('headline is required')
         return self._post_request(api_url, data=entry)
+
+    def publish_draft(self, draft_id):
+        api_url = 'https://{}/api/{}/drafts/{}'.format(self.domain, self.API_VERSION, draft_id)
+        return self._put_request(api_url, params={'action': 'publish'})
 
     def create_author(
         self,
