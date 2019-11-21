@@ -89,7 +89,11 @@ class PostBuilder(object):
         # check dates for future posts
         # publish post/draft
         # return post
-        raise NotImplementedError()
+        status = entry.pop('status')
+        response = self.api.create_draft(**entry)
+        if status == 'post':
+            self.api.publish_draft(response['id'])
+        return response
 
     def postpublish(self, post):
         # TODO: create redirects for current slug and for old slugs
