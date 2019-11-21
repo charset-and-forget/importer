@@ -1,3 +1,6 @@
+from importer.builders import PostBuilder
+
+
 class ItemImporter:
     source_collection = None
     destination_collection = None
@@ -93,10 +96,24 @@ class PostsImporter(ItemImporter):
     destination_collection = 'imported_posts'
     original_key_fields = ['id']
 
+    types_to_import = [u'post', u'page']
+
     def __init__(self, db, api):
         self.db = db
         self.api = api
 
     def upload(self, original_item):
-        response = self.api.create_post(**original_item)
-        self._store_response(original_item, response)
+        builder = self._pick_builder_for_item(original_item)
+        if not builder:
+            return
+        entry = builder.build_entry(original_item)
+        post = builder.publish_entry(entry)
+        post = builder.postpublish(post)
+        self._store_response(original_item, post)
+        print('post:', post['id'])
+
+    def _pick_builder_for_item(self, item):
+        if item['type'] not in self.types_to_import:
+            print('skipping item with type:', item['type'])
+            return
+        return self.default_builder
