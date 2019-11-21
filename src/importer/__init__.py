@@ -119,7 +119,12 @@ class PostsImporter(ItemImporter):
         print('post:', post['id'])
 
     def _pick_builder_for_item(self, item):
-        if item['type'] not in self.types_to_import:
-            print('skipping item with type:', item['type'])
-            return
         return self.default_builder
+
+    def _iter_source_items(self):
+        collection = self.db[self.source_collection]
+        for item in collection.find({}):
+            if item['type'] in self.types_to_import:
+                yield item
+            else:
+                print('skipping item with type:', item['type'])
