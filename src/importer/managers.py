@@ -7,7 +7,7 @@ class StoredAttachmentsManager:
     items_collection = 'attachments'
     response_collection = 'imported_images'
     original_key_fields = ['id', 'url']
-        # item = {i: original_item[i] for i in self.original_key_fields}
+    #    item = {i: original_item[i] for i in self.original_key_fields}
 
     # def __init__(self, roar_id, attachments_source):
     def __init__(self, db):
