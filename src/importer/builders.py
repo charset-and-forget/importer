@@ -49,10 +49,11 @@ class PostBuilder(object):
         'trash': None,
     }
 
-    def __init__(self, authors_manager, sections_manager, attachments_manager):
+    def __init__(self, api, authors_manager, sections_manager, attachments_manager):
         self.authors = authors_manager
         self.attachments = attachments_manager
         self.sections = sections_manager
+        self.api = api
 
     def _build_base_entry(self):
         entry = {
