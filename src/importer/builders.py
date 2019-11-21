@@ -65,7 +65,7 @@ class PostBuilder(object):
 
     def build_entry(self, item):
         entry = self._build_base_entry()
-        for rm_field, (wp_field, parse_func) in self.primitive_mapping.iteritems():
+        for rm_field, (wp_field, parse_func) in self.primitive_mapping.items():
             entry[rm_field] = parse_func(item[wp_field])
         entry['status'] = self.get_status(item)
         entry['tags'] = self.get_tags(item)
