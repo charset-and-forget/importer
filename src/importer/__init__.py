@@ -1,4 +1,4 @@
-from importer.builders import PostBuilder
+from importer import builders, managers
 
 
 class ItemImporter:
@@ -101,6 +101,12 @@ class PostsImporter(ItemImporter):
     def __init__(self, db, api):
         self.db = db
         self.api = api
+        self.default_builder = builders.PostBuilder(
+            api,
+            managers.WpAuthorsManager(db),
+            managers.WpSectionsManager(db),
+            managers.StoredAttachmentsManager(db),
+        )
 
     def upload(self, original_item):
         builder = self._pick_builder_for_item(original_item)
