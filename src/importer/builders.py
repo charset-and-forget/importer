@@ -10,6 +10,7 @@ class FieldHandlers:
     def as_is(cls, value):
         return value
 
+    @classmethod
     def wp_pub_date(cls, value):
         dt = datetime.datetime.strptime(value, '%a, %d %b %Y %H:%M:%S %z')
         return int(dt.timestamp())
