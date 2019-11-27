@@ -21,21 +21,44 @@ class SectionStatus:
 class ApiBase:
     API_VERSION = '1.3'
 
-    def __init__(self, domain, api_key, http_auth_user=None, http_auth_pwd=None):
+    def __init__(self, domain, api_key, http_auth_user=None, http_auth_pwd=None, verbosity=0):
         self.domain = domain
         self.api_key = api_key
+        self.verbosity = verbosity
         self.auth = (http_auth_user, http_auth_pwd) if http_auth_user else None
 
     def _request(self, request):
         # requests.Request(method, url, headers, files, data, params, auth, cookies, hooks, json)
+        self._print_info_about_request(request)
         session = requests.Session()
         prepped = request.prepare()
         response = session.send(prepped)
+        self._print_info_about_response(response)
         if response.status_code == requests.codes.ok:
             return response.json()
         print(response.url)
         print(response.history)
         raise ApiError(response.json())
+
+    def _print_info_about_request(self, request):
+        if self.verbosity == 0:
+            return
+        if self.verbosity >= 1:
+            print('API call:', request.method, request.url)
+        if self.verbosity >= 2:
+            print('params:', request.params)
+            print('json:', request.json)
+        # print()
+
+    def _print_info_about_response(self, response):
+        if self.verbosity == 0:
+            return
+        if self.verbosity >= 1:
+            print('API response:', response.status_code)
+        if self.verbosity >= 2:
+            if response.status_code != requests.codes.ok or self.verbosity >= 3:
+                print(response.content)
+        print()
 
     def _post_request(self, url, params=None, data=None):
         params = self._build_params(params)
