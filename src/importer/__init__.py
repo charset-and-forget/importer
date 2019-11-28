@@ -63,11 +63,19 @@ class SectionsImporter(ItemImporter):
     destination_collection = 'imported_sections'
     original_key_fields = ['title', 'url']
 
+    def __init__(self, db, api):
+        self.db = db
+        self.api = api
+        self.created_sections = {i['url']: i for i in api.get_sections()}
+
     def upload(self, original_item):
-        response = self.api.create_section(
-            title=original_item['title'],
-            url=original_item['url'],
-        )
+        if original_item['url'] in self.created_sections:
+            response = self.created_sections[original_item['url']]
+        else:
+            response = self.api.create_section(
+                title=original_item['title'],
+                url=original_item['url'],
+            )
         self._store_response(original_item, response)
 
 

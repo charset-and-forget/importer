@@ -60,6 +60,16 @@ class ApiBase:
                 print(response.content)
         print()
 
+    def _get_request(self, url, params=None):
+        params = self._build_params(params)
+        request = requests.Request(
+            'GET',
+            url=url,
+            params=params,
+            auth=self.auth,
+        )
+        return self._request(request)
+
     def _post_request(self, url, params=None, data=None):
         params = self._build_params(params)
         request = requests.Request(
@@ -105,6 +115,11 @@ class API(ApiBase):
         }
         return result
 
+    def get_sections(self):
+        api_url = 'https://{}/api/{}/sections'.format(self.domain, self.API_VERSION)
+        response = self._get_request(api_url)
+        return map(self._extract_section_info_from_item, response)
+
     def create_section(self, title, url, status=SectionStatus.PRIVATE, about_html=''):
         api_url = 'https://{}/api/{}/sections'.format(self.domain, self.API_VERSION)
         params = {
@@ -114,14 +129,7 @@ class API(ApiBase):
             'about_html': about_html,
         }
         response = self._post_request(api_url, data=params)
-        result = {
-            'id': response['id'],
-            'title': response['title'],
-            'url': response['url'],
-            'status': response['status'],
-            'parent_id': response['parent_id'],
-        }
-        return result
+        return self._extract_section_info_from_item(response)
 
     def create_draft(self, **entry):
         api_url = 'https://{}/api/{}/drafts'.format(self.domain, self.API_VERSION)
@@ -165,3 +173,12 @@ class API(ApiBase):
             params['specific_data'] = specific_data
         response = self._post_request(api_url, data=params)
         return response
+
+    def _extract_section_info_from_item(self, item):
+        return {
+            'id': item['id'],
+            'title': item['title'],
+            'url': item['url'],
+            'status': item['status'],
+            'parent_id': item['parent_id'],
+        }
