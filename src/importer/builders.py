@@ -132,7 +132,8 @@ class PostBuilder(object):
                 slug = cat['nicename']
                 if slug == 'uncategorized' and not self.ALLOW_UNCATEGORIZED:
                     continue
-                sections.append(self.sections.get_by_slug(slug))
+                # sections.append(self.sections.get_by_slug(slug))
+                sections.append(slug)
         if self.PUBLISH_TO_FRONTPAGE:
             sections.append('Home')
         return sections
