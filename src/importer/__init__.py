@@ -14,7 +14,7 @@ class ItemImporter:
         failed = []
         for original_item in self._iter_source_items():
             if self._is_processed(original_item):
-                print('item already processed:', original_item['_id'])
+                print('item already processed')
                 continue
             try:
                 self.upload(original_item)
@@ -28,6 +28,7 @@ class ItemImporter:
     def _iter_source_items(self):
         collection = self.db[self.source_collection]
         for item in collection.find({}):
+            del(item['_id'])
             yield item
 
     def _is_processed(self, original_item):
@@ -133,6 +134,7 @@ class PostsImporter(ItemImporter):
         collection = self.db[self.source_collection]
         for item in collection.find({}):
             if item['type'] in self.types_to_import:
+                del(item['_id'])
                 yield item
             else:
                 print('skipping item with type:', item['type'])
