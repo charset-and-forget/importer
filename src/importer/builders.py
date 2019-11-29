@@ -120,6 +120,7 @@ class PostBuilder(object):
         return tags
 
     def get_roar_author_ids(self, item):
+        return []
         author_id = self.authors.get_by_key(item['creator'])
         return [author_id]
 
