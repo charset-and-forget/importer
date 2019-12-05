@@ -139,8 +139,11 @@ class PostBuilder(object):
         return sections
 
     def get_dates(self, item):
-        created_ts = FieldHandlers.wp_pub_date(item['pub_date'])
-        response = {'created_ts': created_ts}
+        response = {}
+        try:
+            response['created_ts'] = FieldHandlers.wp_pub_date(item['pub_date'])
+        except TypeError:
+            pass
         # TODO: check for scheduling
         return response
 
