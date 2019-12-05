@@ -170,9 +170,9 @@ class PostBuilder(object):
             if field_name in meta:
                 thumb_id = int(meta[field_name][0])
                 image_info = self.attachments.get_image_info_by_id(thumb_id)
-                if image_info and 'id' in image_info:
+                if image_info and 'image_id' in image_info:
                     response = {
-                        'image_id': image_info['id'],
+                        'image_id': image_info['image_id'],
                         'type': 'image',
                     }
                     caption, credit = self.attachments.get_caption_and_credit(thumb_id)
