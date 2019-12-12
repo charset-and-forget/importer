@@ -81,12 +81,13 @@ class ApiBase:
         )
         return self._request(request)
 
-    def _put_request(self, url, params=None):
+    def _put_request(self, url, params=None, data=None):
         params = self._build_params(params)
         request = requests.Request(
             'PUT',
             url=url,
             params=params,
+            json=data,
             auth=self.auth,
         )
         return self._request(request)
@@ -139,7 +140,7 @@ class API(ApiBase):
 
     def publish_draft(self, draft_id):
         api_url = 'https://{}/api/{}/drafts/{}'.format(self.domain, self.API_VERSION, draft_id)
-        return self._put_request(api_url, params={'action': 'publish'})
+        return self._put_request(api_url, data={'action': 'publish'})
 
     def create_author(
         self,
