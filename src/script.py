@@ -36,6 +36,10 @@ def main():
     failed_sections = sections.upload_all()
     print(len(failed_sections))
 
+    posts = importer.PostsImporter(db, api)
+    failed_posts = posts.upload_all()
+    print(len(failed_posts))
+
 
 if __name__ == '__main__':
     main()
