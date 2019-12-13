@@ -5,6 +5,55 @@ import re
 # from scraper.embed_facade import get_embed
 
 
+class BodyHandler:
+    TW_URI_RE = re.compile(r'(?<!")https?://twitter.com/(?P<user>\w+)/status/(?P<embed_id>\d+)\/?(photo\/\d+)?(\?[\w_]+[=\w\d\%\^]+)?')
+    YOUTUBE_RE = re.compile(r'(?<!\[youtube)(^|[^\"\'])(?P<youtube>http[s]?://(?:www\.)?(?:youtube\.com|youtu\.be).*?)(\s+|$|\<|\[)')
+    CAPTION_RE = re.compile(r'\[caption[^\]]*?\](?P<text>.*?)\[\/caption\]', flags=re.IGNORECASE)
+
+    @classmethod
+    def caption(cls, text):
+        return re.sub(cls.CAPTION_RE, cls.__caption_replace, text)
+
+    @classmethod
+    def twitter(cls, text):
+        return re.sub(cls.TW_URI_RE, cls.__tw_replace, text)
+
+    @classmethod
+    def youtube(cls, text):
+        return re.sub(cls.YOUTUBE_RE, cls.__youtube_replace, text)
+
+    @staticmethod
+    def __caption_replace(elem):
+        if len(elem.groups()) == 1:
+            try:
+                return elem.groups()['text']
+            except Exception:
+                pass
+        return elem
+
+    @staticmethod
+    def __tw_replace(elem):
+        url = 'https://twitter.com/{}/status/{}'.format(
+            elem.groupdict()['user'],
+            elem.groupdict()['embed_id']
+        )
+        shortcode_text = '[twitter_embed {} expand=1]'.format(url)
+        if not shortcode_text:
+            return ''
+        return shortcode_text
+
+    @staticmethod
+    def __youtube_replace(elem):
+        try:
+            url = elem.groupdict()['youtube']
+            shortcode_text = '[youtube {} expand=1]'.format(url)
+            if not shortcode_text:
+                return elem.groupdict()['youtube']
+            return elem.group(1) + shortcode_text + elem.group(3)
+        except Exception:
+            return ''
+
+
 class FieldHandlers:
     @classmethod
     def as_is(cls, value):
@@ -83,6 +132,9 @@ class PostBuilder(object):
 
     def prepare_body(self, body):
         # TODO: body processing
+        body = BodyHandler.caption(body)
+        body = BodyHandler.twitter(body)
+        body = BodyHandler.youtube(body)
         return body
 
     def publish_entry(self, entry):
@@ -120,7 +172,6 @@ class PostBuilder(object):
         return tags
 
     def get_roar_author_ids(self, item):
-        return []
         author_id = self.authors.get_by_key(item['creator'])
         return [author_id]
 
