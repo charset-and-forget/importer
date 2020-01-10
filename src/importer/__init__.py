@@ -1,3 +1,6 @@
+from importer import builders, managers
+
+
 class ItemImporter:
     source_collection = None
     destination_collection = None
@@ -11,7 +14,7 @@ class ItemImporter:
         failed = []
         for original_item in self._iter_source_items():
             if self._is_processed(original_item):
-                print('item already processed:', original_item['_id'])
+                print('item already processed')
                 continue
             try:
                 self.upload(original_item)
@@ -25,6 +28,7 @@ class ItemImporter:
     def _iter_source_items(self):
         collection = self.db[self.source_collection]
         for item in collection.find({}):
+            del(item['_id'])
             yield item
 
     def _is_processed(self, original_item):
@@ -60,11 +64,19 @@ class SectionsImporter(ItemImporter):
     destination_collection = 'imported_sections'
     original_key_fields = ['title', 'url']
 
+    def __init__(self, db, api):
+        self.db = db
+        self.api = api
+        self.created_sections = {i['url']: i for i in api.get_sections()}
+
     def upload(self, original_item):
-        response = self.api.create_section(
-            title=original_item['title'],
-            url=original_item['url'],
-        )
+        if original_item['url'] in self.created_sections:
+            response = self.created_sections[original_item['url']]
+        else:
+            response = self.api.create_section(
+                title=original_item['title'],
+                url=original_item['url'],
+            )
         self._store_response(original_item, response)
 
 
@@ -86,3 +98,43 @@ class AuthorsImporter(ItemImporter):
             },
         )
         self._store_response(original_item, response)
+
+
+class PostsImporter(ItemImporter):
+    source_collection = 'posts'
+    destination_collection = 'imported_posts'
+    original_key_fields = ['id']
+
+    types_to_import = [u'post', u'page']
+
+    def __init__(self, db, api):
+        self.db = db
+        self.api = api
+        self.default_builder = builders.PostBuilder(
+            api,
+            managers.WpAuthorsManager(db),
+            managers.WpSectionsManager(db),
+            managers.StoredAttachmentsManager(db),
+        )
+
+    def upload(self, original_item):
+        builder = self._pick_builder_for_item(original_item)
+        if not builder:
+            return
+        entry = builder.build_entry(original_item)
+        post = builder.publish_entry(entry)
+        post = builder.postpublish(post)
+        self._store_response(original_item, post)
+        print('post:', post['id'])
+
+    def _pick_builder_for_item(self, item):
+        return self.default_builder
+
+    def _iter_source_items(self):
+        collection = self.db[self.source_collection]
+        for item in collection.find({}):
+            if item['type'] in self.types_to_import:
+                del(item['_id'])
+                yield item
+            else:
+                print('skipping item with type:', item['type'])

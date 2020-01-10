@@ -8,20 +8,97 @@ class ApiError(Exception):
     pass
 
 
+class ApiValidationError(ApiError):
+    pass
+
+
 class SectionStatus:
     PRIVATE = 1
     PUBLIC = 2
     UNLISTED = 3
 
 
-class API:
+class ApiBase:
     API_VERSION = '1.3'
 
-    def __init__(self, domain, api_key, http_auth_user=None, http_auth_pwd=None):
+    def __init__(self, domain, api_key, http_auth_user=None, http_auth_pwd=None, verbosity=0):
         self.domain = domain
         self.api_key = api_key
+        self.verbosity = verbosity
         self.auth = (http_auth_user, http_auth_pwd) if http_auth_user else None
 
+    def _request(self, request):
+        # requests.Request(method, url, headers, files, data, params, auth, cookies, hooks, json)
+        self._print_info_about_request(request)
+        session = requests.Session()
+        prepped = request.prepare()
+        response = session.send(prepped)
+        self._print_info_about_response(response)
+        if response.status_code == requests.codes.ok:
+            return response.json()
+        print(response.url)
+        print(response.history)
+        raise ApiError(response.json())
+
+    def _print_info_about_request(self, request):
+        if self.verbosity == 0:
+            return
+        if self.verbosity >= 1:
+            print('API call:', request.method, request.url)
+        if self.verbosity >= 2:
+            print('params:', request.params)
+            print('json:', request.json)
+        # print()
+
+    def _print_info_about_response(self, response):
+        if self.verbosity == 0:
+            return
+        if self.verbosity >= 1:
+            print('API response:', response.status_code)
+        if self.verbosity >= 2:
+            if response.status_code != requests.codes.ok or self.verbosity >= 3:
+                print(response.content)
+        print()
+
+    def _get_request(self, url, params=None):
+        params = self._build_params(params)
+        request = requests.Request(
+            'GET',
+            url=url,
+            params=params,
+            auth=self.auth,
+        )
+        return self._request(request)
+
+    def _post_request(self, url, params=None, data=None):
+        params = self._build_params(params)
+        request = requests.Request(
+            'POST',
+            url=url,
+            json=data,
+            params=params,
+            auth=self.auth,
+        )
+        return self._request(request)
+
+    def _put_request(self, url, params=None, data=None):
+        params = self._build_params(params)
+        request = requests.Request(
+            'PUT',
+            url=url,
+            params=params,
+            json=data,
+            auth=self.auth,
+        )
+        return self._request(request)
+
+    def _build_params(self, params):
+        params = copy.deepcopy(params) if params else {}
+        params['api_key'] = self.api_key
+        return params
+
+
+class API(ApiBase):
     def upload_image(self, image_url, caption='', credit='', alt=''):
         url = 'https://{}/api/{}/images'.format(self.domain, self.API_VERSION)
         params = {
@@ -39,6 +116,11 @@ class API:
         }
         return result
 
+    def get_sections(self):
+        api_url = 'https://{}/api/{}/sections'.format(self.domain, self.API_VERSION)
+        response = self._get_request(api_url)
+        return map(self._extract_section_info_from_item, response)
+
     def create_section(self, title, url, status=SectionStatus.PRIVATE, about_html=''):
         api_url = 'https://{}/api/{}/sections'.format(self.domain, self.API_VERSION)
         params = {
@@ -48,14 +130,17 @@ class API:
             'about_html': about_html,
         }
         response = self._post_request(api_url, data=params)
-        result = {
-            'id': response['id'],
-            'title': response['title'],
-            'url': response['url'],
-            'status': response['status'],
-            'parent_id': response['parent_id'],
-        }
-        return result
+        return self._extract_section_info_from_item(response)
+
+    def create_draft(self, **entry):
+        api_url = 'https://{}/api/{}/drafts'.format(self.domain, self.API_VERSION)
+        if not entry.get('headline'):
+            raise ApiValidationError('headline is required')
+        return self._post_request(api_url, data=entry)
+
+    def publish_draft(self, draft_id):
+        api_url = 'https://{}/api/{}/drafts/{}'.format(self.domain, self.API_VERSION, draft_id)
+        return self._put_request(api_url, data={'action': 'publish'})
 
     def create_author(
         self,
@@ -90,29 +175,11 @@ class API:
         response = self._post_request(api_url, data=params)
         return response
 
-    def _request(self, request):
-        # requests.Request(method, url, headers, files, data, params, auth, cookies, hooks, json)
-        session = requests.Session()
-        prepped = request.prepare()
-        response = session.send(prepped)
-        if response.status_code == requests.codes.ok:
-            return response.json()
-        print(response.url)
-        print(response.history)
-        raise ApiError(response.json())
-
-    def _post_request(self, url, params=None, data=None):
-        params = self._build_params(params)
-        request = requests.Request(
-            'POST',
-            url=url,
-            json=data,
-            params=params,
-            auth=self.auth,
-        )
-        return self._request(request)
-
-    def _build_params(self, params):
-        params = copy.deepcopy(params) if params else {}
-        params['api_key'] = self.api_key
-        return params
+    def _extract_section_info_from_item(self, item):
+        return {
+            'id': item['id'],
+            'title': item['title'],
+            'url': item['url'],
+            'status': item['status'],
+            'parent_id': item['parent_id'],
+        }
