@@ -2,15 +2,8 @@
 
 This repositiry created specifically for RebelMouse clients who is willing to perform content import from their current platform to RebelMouse
 
-# importer
-
-Put python code into: `/src/`
-
-Default entrypoint without any parameters: `/src/script.py`
-
-Put data into: `/data/`
-
-Add environmental variables into: `/docker.env`
+This environment is using Python and MongoDB.
+To run it you will need docker installed
 
 # Getting started
 
@@ -25,3 +18,10 @@ docker-compose up --build
 ```bash
 docker-compose.exe up --build
 ```
+Scripts code can be found in: `/src/`
+
+Default entrypoint without any parameters: `/src/script.py`
+
+Your data dump should be placed into: `/data/`
+
+Place your account credentials: `/docker.env`
