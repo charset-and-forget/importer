@@ -2,11 +2,10 @@
 
 This repositiry created specifically for RebelMouse clients who is willing to perform content import from their current platform to RebelMouse
 
-This environment is using Python and MongoDB.
-To run it you will need docker installed
+
 
 # Getting started
-
+To run it you will need docker installed
 ## OSX and Linux
 
 ```bash
@@ -25,3 +24,5 @@ Default entrypoint without any parameters: `/src/script.py`
 Your data dump should be placed into: `/data/`
 
 Place your account credentials: `/docker.env`
+
+NOTE:T his environment is using Python and MongoDB.
