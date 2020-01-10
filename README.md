@@ -1,3 +1,7 @@
+# Objective
+
+This repositiry created specifically for RebelMouse clients who is willing to perform content import from their current platform to RebelMouse
+
 # importer
 
 Put python code into: `/src/`
