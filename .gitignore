@@ -1,4 +1,5 @@
 src/settings.py
+docker.env
 test.py
 sftp-config.json
 
