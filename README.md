@@ -25,4 +25,4 @@ Your data dump should be placed into: `/data/`
 
 Place your account credentials: `/docker.env`
 
-NOTE:T his environment is using Python and MongoDB.
+NOTE: This environment is using Python and MongoDB.
