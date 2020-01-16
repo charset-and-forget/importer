@@ -1,4 +1,5 @@
 import copy
+import time
 # import json
 
 import requests
@@ -20,18 +21,23 @@ class SectionStatus:
 
 class ApiBase:
     API_VERSION = '1.3'
+    rate_limit_window = 60  # seconds
 
-    def __init__(self, domain, api_key, http_auth_user=None, http_auth_pwd=None, verbosity=0):
+    def __init__(self, domain, api_key, rate_limit=20, http_auth_user=None, http_auth_pwd=None, verbosity=0):
         self.domain = domain
         self.api_key = api_key
         self.verbosity = verbosity
         self.auth = (http_auth_user, http_auth_pwd) if http_auth_user else None
+
+        self.rate_limit = rate_limit
+        self.call_timestamps = []
 
     def _request(self, request):
         # requests.Request(method, url, headers, files, data, params, auth, cookies, hooks, json)
         self._print_info_about_request(request)
         session = requests.Session()
         prepped = request.prepare()
+        self._hold_on_for_rate_limit()
         response = session.send(prepped)
         self._print_info_about_response(response)
         if response.status_code == requests.codes.ok:
@@ -96,6 +102,19 @@ class ApiBase:
         params = copy.deepcopy(params) if params else {}
         params['api_key'] = self.api_key
         return params
+
+    def _hold_on_for_rate_limit(self):
+        if len(self.call_timestamps) < self.rate_limit:
+            self.call_timestamps.append(time.time())
+            return
+        if len(self.call_timestamps) == self.rate_limit:
+            time_delta = time.time() - self.call_timestamps[0]
+            if time_delta < self.rate_limit_window:
+                delay = self.rate_limit_window - time_delta
+                print('Hold on for rate limit:', delay)
+                time.sleep(delay)
+            self.call_timestamps.append(time.time())
+            self.call_timestamps = self.call_timestamps[1:]
 
 
 class API(ApiBase):
