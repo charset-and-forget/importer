@@ -21,7 +21,8 @@ def main():
     api = API(**settings.API)
 
     # parse
-    WpPreparator.process('/data/wp_sample.xml', db)
+    mask = os.path.join(os.getenv('BASEPATH_DATA'), '*.xml')
+    WpPreparator.process(mask, db)
 
     # import
     images = importer.ImageImporter(db, api)
